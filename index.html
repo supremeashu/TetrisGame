@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1C1C1C;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        h1 {
+            margin: 20px 0;
+            color: #f1e60d;
+        }
+        
+        #gameContainer {
+            margin: 20px 0;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .controls h3 {
+            margin: 10px 0;
+            color: #6cc6d9;
+        }
+        
+        .controls p {
+            margin: 5px 0;
+            color: #ccc;
+        }
+        
+        canvas {
+            border: 2px solid #ffffff;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #f1e60d;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Tetris Game</h1>
+    
+    <div class="controls">
+        <h3>Controls:</h3>
+        <p>← → Arrow Keys: Move</p>
+        <p>↑ Arrow Key: Rotate</p>
+        <p>↓ Arrow Key: Drop faster</p>
+        <p>Space: Hard drop</p>
+    </div>
+    
+    <div id="gameContainer">
+        <div class="loading">
+            <p>Loading game...</p>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { main } from "./dist/web_main.js";
+        main();
+    </script>
+</body>
+</html>

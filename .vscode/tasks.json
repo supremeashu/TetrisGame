@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Tetris Game",
+			"type": "shell",
+			"command": "\"C:/D folder/_projects/games/tetris/.venv/Scripts/python.exe\"",
+			"args": ["\"tetris game/main.py\""],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

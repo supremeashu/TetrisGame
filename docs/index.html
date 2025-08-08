@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <title>Tetris Game</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="height=device-height, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+
+    <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1C1C1C;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        h1 {
+            margin: 20px 0;
+            color: #f1e60d;
+            text-align: center;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 600px;
+        }
+        
+        .controls h3 {
+            margin: 10px 0;
+            color: #6cc6d9;
+        }
+        
+        .controls p {
+            margin: 5px 0;
+            color: #ccc;
+        }
+        
+        #gameframe {
+            width: 100%;
+            max-width: 1024px;
+            height: 600px;
+            border: 2px solid #ffffff;
+            border-radius: 5px;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #f1e60d;
+            padding: 20px;
+        }
+
+        @media (max-width: 768px) {
+            #gameframe {
+                width: 100vw;
+                height: 70vh;
+                border: none;
+            }
+            
+            .controls {
+                font-size: 14px;
+                padding: 10px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Tetris Game</h1>
+    
+    <div class="controls">
+        <h3>Controls:</h3>
+        <p>← → Arrow Keys: Move pieces left/right</p>
+        <p>↑ Arrow Key: Rotate piece</p>
+        <p>↓ Arrow Key: Drop faster</p>
+        <p>Space: Hard drop</p>
+    </div>
+    
+    <div class="loading">
+        <p>🎯 Experience the classic Tetris with authentication!</p>
+    </div>
+    
+    <div style="text-align: center; margin: 20px;">
+        <a href="auth.html" style="
+            background: linear-gradient(45deg, #f1e60d, #65b32e);
+            color: #1C1C1C;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            🔐 Login & Play Tetris
+        </a>
+        
+        <br>
+        
+        <div style="background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; margin: 20px; max-width: 500px; display: inline-block;">
+            <h3 style="color: #6cc6d9; margin: 0 0 10px 0;">✨ Features:</h3>
+            <p style="margin: 5px 0; font-size: 14px;">• 🔐 User authentication & progress tracking</p>
+            <p style="margin: 5px 0; font-size: 14px;">• 📊 Personal statistics & best scores</p>
+            <p style="margin: 5px 0; font-size: 14px;">• 🎮 Classic Tetris gameplay with original colors</p>
+            <p style="margin: 5px 0; font-size: 14px;">• 📱 Sidebar layout with 3 next piece previews</p>
+            <p style="margin: 5px 0; font-size: 14px;">• 👤 Guest play option available</p>
+        </div>
+        
+        <br>
+        
+        <a href="leaderboard.html" style="
+            background: linear-gradient(45deg, #f1e60d, #ffa500);
+            color: #1C1C1C;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            🏆 View Leaderboard
+        </a>
+        
+        <a href="tetris-web.html" style="
+            background: linear-gradient(45deg, #6cc6d9, #204b9b);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            🎮 Quick Play (No Login)
+        </a>
+        
+        <a href="tetris.html" target="_blank" style="
+            background: linear-gradient(45deg, #7b217f, #5a1a5a);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            🐍 Python Version (Experimental)
+        </a>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px; color: #888;">
+        <p>Built with Pygame for Web | Hosted on GitHub Pages</p>
+    </div>
+</body>
+</html>

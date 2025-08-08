@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris - Leaderboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1C1C1C, #2C2C2C);
+            color: white;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #f1e60d;
+            text-shadow: 0 0 10px #f1e60d;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .leaderboard {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #f1e60d;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard h2 {
+            color: #6cc6d9;
+            margin: 0 0 20px 0;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .player-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid transparent;
+        }
+
+        .player-row.rank-1 {
+            border-left-color: #f1e60d;
+            background: linear-gradient(90deg, rgba(241, 230, 13, 0.2), rgba(255, 255, 255, 0.1));
+        }
+
+        .player-row.rank-2 {
+            border-left-color: #c0c0c0;
+            background: linear-gradient(90deg, rgba(192, 192, 192, 0.2), rgba(255, 255, 255, 0.1));
+        }
+
+        .player-row.rank-3 {
+            border-left-color: #cd7f32;
+            background: linear-gradient(90deg, rgba(205, 127, 50, 0.2), rgba(255, 255, 255, 0.1));
+        }
+
+        .rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            width: 50px;
+            text-align: center;
+        }
+
+        .rank.gold { color: #f1e60d; }
+        .rank.silver { color: #c0c0c0; }
+        .rank.bronze { color: #cd7f32; }
+
+        .player-info {
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .player-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .player-stats {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+        .score {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #f1e60d;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .nav-buttons {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #6cc6d9, #204b9b);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0 10px;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn.primary {
+            background: linear-gradient(45deg, #f1e60d, #65b32e);
+            color: #1C1C1C;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #6cc6d9;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #f1e60d;
+            display: block;
+        }
+
+        .stat-label {
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .player-row {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .player-info {
+                margin: 10px 0;
+            }
+            
+            .rank, .score {
+                width: auto;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Tetris Leaderboard</h1>
+        
+        <div class="leaderboard">
+            <h2>🥇 Top Scores</h2>
+            <div id="scoreLeaderboard">
+                <div class="empty-state">
+                    <p>No players yet. Be the first to set a high score!</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="leaderboard">
+            <h2>🎯 Highest Levels</h2>
+            <div id="levelLeaderboard">
+                <div class="empty-state">
+                    <p>No players yet. Be the first to reach a high level!</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-value" id="totalPlayers">0</span>
+                <div class="stat-label">Total Players</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="totalGames">0</span>
+                <div class="stat-label">Games Played</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="totalLines">0</span>
+                <div class="stat-label">Lines Cleared</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="averageScore">0</span>
+                <div class="stat-label">Average Score</div>
+            </div>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="auth.html" class="btn primary">🎮 Play Game</a>
+            <a href="index.html" class="btn">🏠 Home</a>
+        </div>
+    </div>
+
+    <script>
+        class Leaderboard {
+            constructor() {
+                this.users = this.loadUsers();
+                this.renderLeaderboards();
+                this.renderStats();
+            }
+
+            loadUsers() {
+                const users = localStorage.getItem('tetrisUsers');
+                return users ? JSON.parse(users) : {};
+            }
+
+            renderLeaderboards() {
+                this.renderScoreLeaderboard();
+                this.renderLevelLeaderboard();
+            }
+
+            renderScoreLeaderboard() {
+                const container = document.getElementById('scoreLeaderboard');
+                const players = Object.entries(this.users)
+                    .filter(([username, data]) => data.bestScore > 0)
+                    .sort((a, b) => b[1].bestScore - a[1].bestScore)
+                    .slice(0, 10);
+
+                if (players.length === 0) {
+                    return;
+                }
+
+                container.innerHTML = '';
+                players.forEach(([username, data], index) => {
+                    const row = this.createPlayerRow(username, data, index + 1, data.bestScore, 'score');
+                    container.appendChild(row);
+                });
+            }
+
+            renderLevelLeaderboard() {
+                const container = document.getElementById('levelLeaderboard');
+                const players = Object.entries(this.users)
+                    .filter(([username, data]) => data.highestLevel > 1)
+                    .sort((a, b) => b[1].highestLevel - a[1].highestLevel)
+                    .slice(0, 10);
+
+                if (players.length === 0) {
+                    return;
+                }
+
+                container.innerHTML = '';
+                players.forEach(([username, data], index) => {
+                    const row = this.createPlayerRow(username, data, index + 1, data.highestLevel, 'level');
+                    container.appendChild(row);
+                });
+            }
+
+            createPlayerRow(username, data, rank, value, type) {
+                const row = document.createElement('div');
+                row.className = `player-row ${rank <= 3 ? `rank-${rank}` : ''}`;
+
+                const rankElement = document.createElement('div');
+                rankElement.className = `rank ${rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : ''}`;
+                rankElement.textContent = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+
+                const playerInfo = document.createElement('div');
+                playerInfo.className = 'player-info';
+                
+                const playerName = document.createElement('div');
+                playerName.className = 'player-name';
+                playerName.textContent = username;
+
+                const playerStats = document.createElement('div');
+                playerStats.className = 'player-stats';
+                
+                if (type === 'score') {
+                    playerStats.innerHTML = `
+                        Level ${data.highestLevel || 1} • 
+                        ${data.totalLines || 0} lines • 
+                        ${data.gamesPlayed || 0} games
+                    `;
+                } else {
+                    playerStats.innerHTML = `
+                        Best Score: ${data.bestScore || 0} • 
+                        ${data.totalLines || 0} lines • 
+                        ${data.gamesPlayed || 0} games
+                    `;
+                }
+
+                playerInfo.appendChild(playerName);
+                playerInfo.appendChild(playerStats);
+
+                const scoreElement = document.createElement('div');
+                scoreElement.className = 'score';
+                scoreElement.textContent = type === 'score' ? value.toLocaleString() : `Level ${value}`;
+
+                row.appendChild(rankElement);
+                row.appendChild(playerInfo);
+                row.appendChild(scoreElement);
+
+                return row;
+            }
+
+            renderStats() {
+                const userEntries = Object.entries(this.users);
+                const totalPlayers = userEntries.length;
+                const totalGames = userEntries.reduce((sum, [, data]) => sum + (data.gamesPlayed || 0), 0);
+                const totalLines = userEntries.reduce((sum, [, data]) => sum + (data.totalLines || 0), 0);
+                const totalScore = userEntries.reduce((sum, [, data]) => sum + (data.bestScore || 0), 0);
+                const averageScore = totalPlayers > 0 ? Math.round(totalScore / totalPlayers) : 0;
+
+                document.getElementById('totalPlayers').textContent = totalPlayers;
+                document.getElementById('totalGames').textContent = totalGames;
+                document.getElementById('totalLines').textContent = totalLines.toLocaleString();
+                document.getElementById('averageScore').textContent = averageScore.toLocaleString();
+            }
+        }
+
+        // Initialize leaderboard
+        new Leaderboard();
+    </script>
+</body>
+</html>

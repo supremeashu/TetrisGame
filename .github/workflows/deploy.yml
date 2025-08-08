@@ -1,0 +1,270 @@
+name: Build and Deploy Tetris Game
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pygame-ce pygbag
+    
+    - name: Build web version
+      run: |
+        # Create web-compatible main file
+        cat > web_main.py << 'EOF'
+        import asyncio
+        import pygame
+        from settings import *
+        from sys import exit
+        from os.path import join
+        
+        # components
+        from game import Game
+        from score import Score
+        from preview import Preview
+        
+        from random import choice
+        
+        class Main:
+            def __init__(self):
+                pygame.init()
+                self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+                self.clock = pygame.time.Clock()
+                pygame.display.set_caption('Tetris')
+        
+                self.next_shapes = [choice(list(TETROMINOS.keys())) for shape in range(3)]
+        
+                self.game = Game(self.get_next_shape, self.update_score)
+                self.score = Score()
+                self.preview = Preview()
+        
+                try:
+                    self.music = pygame.mixer.Sound(join('sound', 'music.wav'))
+                    self.music.set_volume(0.05)
+                    self.music.play(-1)
+                except (pygame.error, FileNotFoundError):
+                    print("Audio file not found, continuing without sound")
+                    self.music = None
+        
+                self.running = True
+        
+            def update_score(self, lines, score, level):
+                self.score.lines = lines
+                self.score.score = score
+                self.score.level = level
+        
+            def get_next_shape(self):
+                next_shape = self.next_shapes.pop(0)
+                self.next_shapes.append(choice(list(TETROMINOS.keys())))
+                return next_shape
+        
+            async def run(self):
+                while self.running:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            self.running = False
+        
+                    self.display_surface.fill(GRAY)
+                    
+                    if not self.game.win:
+                        self.game.run()
+                        self.score.run()
+                        self.preview.run(self.next_shapes)
+                    else:
+                        self.game.run()
+                    
+                    pygame.display.update()
+                    self.clock.tick(60)
+                    
+                    await asyncio.sleep(0)
+        
+                pygame.quit()
+        
+        async def main():
+            game = Main()
+            await game.run()
+        
+        if __name__ == '__main__':
+            asyncio.run(main())
+        EOF
+        
+        # Copy and fix game files
+        cp "tetris game"/*.py .
+        
+        # Fix audio paths in game.py
+        sed -i 's|join(..\x27..\x27,\x27sound\x27|join(\x27sound\x27|g' game.py
+        sed -i 's|join(..\x27..\x27, \x27graphics\x27|join(\x27graphics\x27|g' game.py
+        
+        # Add audio safety check
+        sed -i 's/self.landing_sound.play()/if self.landing_sound: self.landing_sound.play()/' game.py
+        
+        # Build with pygbag
+        python -m pygbag web_main.py --name tetris --width 1024 --height 600
+    
+    - name: Prepare deployment
+      run: |
+        # Create docs directory
+        mkdir -p docs
+        
+        # Copy built files
+        cp build/web/* docs/ 2>/dev/null || true
+        
+        # Create custom index.html
+        cat > docs/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <title>Tetris Game</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {
+                    margin: 0;
+                    padding: 0;
+                    background: linear-gradient(135deg, #1C1C1C, #2C2C2C);
+                    color: white;
+                    font-family: Arial, sans-serif;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 100vh;
+                }
+                
+                h1 {
+                    color: #f1e60d;
+                    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                    margin: 20px 0;
+                    font-size: 3em;
+                }
+                
+                .controls {
+                    background: rgba(0,0,0,0.7);
+                    padding: 20px;
+                    border-radius: 15px;
+                    margin: 20px;
+                    border: 2px solid #f1e60d;
+                    max-width: 600px;
+                    text-align: center;
+                }
+                
+                .controls h3 {
+                    color: #6cc6d9;
+                    margin: 15px 0;
+                }
+                
+                .controls p {
+                    color: #ccc;
+                    margin: 8px 0;
+                }
+                
+                .play-button {
+                    background: linear-gradient(45deg, #f1e60d, #65b32e);
+                    color: #1C1C1C;
+                    padding: 20px 40px;
+                    text-decoration: none;
+                    border-radius: 15px;
+                    font-size: 24px;
+                    font-weight: bold;
+                    display: inline-block;
+                    margin: 20px;
+                    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+                    transition: all 0.3s ease;
+                    border: none;
+                    cursor: pointer;
+                }
+                
+                .play-button:hover {
+                    transform: translateY(-3px) scale(1.05);
+                    box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+                }
+                
+                .github-link {
+                    margin-top: 30px;
+                    color: #888;
+                }
+                
+                .github-link a {
+                    color: #6cc6d9;
+                    text-decoration: none;
+                }
+                
+                @media (max-width: 768px) {
+                    h1 { font-size: 2em; }
+                    .controls { margin: 10px; padding: 15px; }
+                    .play-button { padding: 15px 30px; font-size: 20px; }
+                }
+            </style>
+        </head>
+        <body>
+            <h1>🎮 Tetris Game</h1>
+            
+            <div class="controls">
+                <h3>🎯 How to Play</h3>
+                <p>← → Arrow Keys: Move pieces left/right</p>
+                <p>↑ Arrow Key: Rotate piece</p>
+                <p>↓ Arrow Key: Drop faster</p>
+                <p>Space: Hard drop</p>
+                <p><strong>Goal:</strong> Clear lines by filling them completely!</p>
+            </div>
+            
+            <a href="index_pygbag.html" class="play-button">
+                🚀 Start Playing Now!
+            </a>
+            
+            <div class="github-link">
+                <p>Built with Pygame for Web | <a href="https://github.com/supremeashu/TetrisGame" target="_blank">View Source</a></p>
+            </div>
+        </body>
+        </html>
+        EOF
+        
+        # Rename the original pygbag index.html
+        if [ -f "docs/index.html.bak" ]; then
+            mv docs/index.html.bak docs/index_pygbag.html
+        elif [ -f "build/web/index.html" ]; then
+            cp build/web/index.html docs/index_pygbag.html
+        fi
+        
+        # Create .nojekyll for GitHub Pages
+        touch docs/.nojekyll
+    
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: ./docs
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

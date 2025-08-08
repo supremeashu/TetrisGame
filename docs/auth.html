@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris - Login</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1C1C1C, #2C2C2C);
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .auth-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #f1e60d;
+            border-radius: 15px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(241, 230, 13, 0.3);
+        }
+
+        h1 {
+            color: #f1e60d;
+            text-shadow: 0 0 10px #f1e60d;
+            font-size: 2.5rem;
+            margin: 0 0 30px 0;
+        }
+
+        .form-group {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: #6cc6d9;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #6cc6d9;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #f1e60d;
+            box-shadow: 0 0 10px rgba(241, 230, 13, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #f1e60d, #65b32e);
+            color: #1C1C1C;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #6cc6d9, #204b9b);
+            color: white;
+        }
+
+        .toggle-link {
+            color: #6cc6d9;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 20px;
+            display: inline-block;
+        }
+
+        .toggle-link:hover {
+            color: #f1e60d;
+        }
+
+        .error-message {
+            background: #e51b20;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .success-message {
+            background: #65b32e;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .user-stats {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #65b32e;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            color: #ccc;
+        }
+
+        .stat-value {
+            color: #f1e60d;
+            font-weight: bold;
+        }
+
+        .tetris-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .falling-block {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #f1e60d, #65b32e);
+            border: 1px solid #fff;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            from {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0.8;
+            }
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .guest-play {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tetris-animation" id="tetrisAnimation"></div>
+    
+    <div class="auth-container">
+        <h1>🎮 TETRIS</h1>
+        
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+        
+        <!-- Login Form -->
+        <div id="loginForm">
+            <form id="loginFormElement">
+                <div class="form-group">
+                    <label for="loginUsername">Username</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn">🚀 Login & Play</button>
+            </form>
+            
+            <div class="toggle-link" onclick="showRegisterForm()">
+                New player? Create an account
+            </div>
+            
+            <div class="guest-play">
+                <button class="btn secondary" onclick="playAsGuest()">
+                    👤 Play as Guest
+                </button>
+            </div>
+        </div>
+        
+        <!-- Register Form -->
+        <div id="registerForm" style="display: none;">
+            <form id="registerFormElement">
+                <div class="form-group">
+                    <label for="registerUsername">Choose Username</label>
+                    <input type="text" id="registerUsername" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Choose Password</label>
+                    <input type="password" id="registerPassword" required minlength="4">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <button type="submit" class="btn">✨ Create Account</button>
+            </form>
+            
+            <div class="toggle-link" onclick="showLoginForm()">
+                Already have an account? Login
+            </div>
+        </div>
+        
+        <!-- User Dashboard -->
+        <div id="userDashboard" style="display: none;">
+            <h2>Welcome, <span id="welcomeUsername"></span>!</h2>
+            
+            <div class="user-stats">
+                <div class="stat-item">
+                    <span>Best Score:</span>
+                    <span class="stat-value" id="userScore">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Highest Level:</span>
+                    <span class="stat-value" id="userLevel">1</span>
+                </div>
+                <div class="stat-item">
+                    <span>Total Lines:</span>
+                    <span class="stat-value" id="userLines">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Games Played:</span>
+                    <span class="stat-value" id="userGames">0</span>
+                </div>
+            </div>
+            
+            <button class="btn" onclick="startGame()">
+                🎮 Start Playing
+            </button>
+            
+            <button class="btn secondary" onclick="viewLeaderboard()">
+                🏆 Leaderboard
+            </button>
+            
+            <button class="btn secondary" onclick="logout()">
+                🚪 Logout
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Authentication System
+        class AuthSystem {
+            constructor() {
+                this.currentUser = null;
+                this.users = this.loadUsers();
+                this.initializeEventListeners();
+                this.createTetrisAnimation();
+                this.checkExistingSession();
+            }
+
+            loadUsers() {
+                const users = localStorage.getItem('tetrisUsers');
+                return users ? JSON.parse(users) : {};
+            }
+
+            saveUsers() {
+                localStorage.setItem('tetrisUsers', JSON.stringify(this.users));
+            }
+
+            checkExistingSession() {
+                const sessionUser = localStorage.getItem('tetrisCurrentUser');
+                if (sessionUser) {
+                    this.currentUser = JSON.parse(sessionUser);
+                    this.showUserDashboard();
+                }
+            }
+
+            initializeEventListeners() {
+                document.getElementById('loginFormElement').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                });
+
+                document.getElementById('registerFormElement').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleRegister();
+                });
+
+                // Enter key handlers
+                document.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const activeForm = document.querySelector('#loginForm:not([style*="none"]), #registerForm:not([style*="none"])');
+                        if (activeForm) {
+                            activeForm.querySelector('form').dispatchEvent(new Event('submit'));
+                        }
+                    }
+                });
+            }
+
+            handleLogin() {
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value;
+
+                if (!username || !password) {
+                    this.showError('Please fill in all fields');
+                    return;
+                }
+
+                if (this.users[username]) {
+                    if (this.users[username].password === password) {
+                        this.currentUser = {
+                            username: username,
+                            ...this.users[username]
+                        };
+                        this.saveSession();
+                        this.showSuccess('Login successful!');
+                        setTimeout(() => this.showUserDashboard(), 1000);
+                    } else {
+                        this.showError('Incorrect password');
+                    }
+                } else {
+                    this.showError('User not found. Please register first.');
+                }
+            }
+
+            handleRegister() {
+                const username = document.getElementById('registerUsername').value.trim();
+                const password = document.getElementById('registerPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                if (!username || !password || !confirmPassword) {
+                    this.showError('Please fill in all fields');
+                    return;
+                }
+
+                if (username.length < 3) {
+                    this.showError('Username must be at least 3 characters');
+                    return;
+                }
+
+                if (password.length < 4) {
+                    this.showError('Password must be at least 4 characters');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    this.showError('Passwords do not match');
+                    return;
+                }
+
+                if (this.users[username]) {
+                    this.showError('Username already exists');
+                    return;
+                }
+
+                // Create new user
+                this.users[username] = {
+                    password: password,
+                    bestScore: 0,
+                    highestLevel: 1,
+                    totalLines: 0,
+                    gamesPlayed: 0,
+                    createdAt: new Date().toISOString()
+                };
+
+                this.saveUsers();
+                this.currentUser = {
+                    username: username,
+                    ...this.users[username]
+                };
+                this.saveSession();
+                this.showSuccess('Account created successfully!');
+                setTimeout(() => this.showUserDashboard(), 1000);
+            }
+
+            saveSession() {
+                localStorage.setItem('tetrisCurrentUser', JSON.stringify(this.currentUser));
+            }
+
+            showUserDashboard() {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('userDashboard').style.display = 'block';
+                
+                document.getElementById('welcomeUsername').textContent = this.currentUser.username;
+                document.getElementById('userScore').textContent = this.currentUser.bestScore || 0;
+                document.getElementById('userLevel').textContent = this.currentUser.highestLevel || 1;
+                document.getElementById('userLines').textContent = this.currentUser.totalLines || 0;
+                document.getElementById('userGames').textContent = this.currentUser.gamesPlayed || 0;
+            }
+
+            showError(message) {
+                const errorDiv = document.getElementById('errorMessage');
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                document.getElementById('successMessage').style.display = 'none';
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 5000);
+            }
+
+            showSuccess(message) {
+                const successDiv = document.getElementById('successMessage');
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+                document.getElementById('errorMessage').style.display = 'none';
+                setTimeout(() => {
+                    successDiv.style.display = 'none';
+                }, 3000);
+            }
+
+            createTetrisAnimation() {
+                const container = document.getElementById('tetrisAnimation');
+                const colors = ['#f1e60d', '#e51b20', '#204b9b', '#65b32e', '#7b217f', '#6cc6d9', '#f07e13'];
+                
+                setInterval(() => {
+                    if (document.querySelectorAll('.falling-block').length < 10) {
+                        const block = document.createElement('div');
+                        block.className = 'falling-block';
+                        block.style.left = Math.random() * 100 + '%';
+                        block.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        block.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                        container.appendChild(block);
+                        
+                        setTimeout(() => {
+                            if (block.parentNode) {
+                                block.parentNode.removeChild(block);
+                            }
+                        }, 8000);
+                    }
+                }, 1000);
+            }
+
+            updateUserProgress(score, level, lines) {
+                if (!this.currentUser || this.currentUser.username === 'Guest') return;
+
+                const user = this.users[this.currentUser.username];
+                user.bestScore = Math.max(user.bestScore || 0, score);
+                user.highestLevel = Math.max(user.highestLevel || 1, level);
+                user.totalLines = (user.totalLines || 0) + lines;
+                user.gamesPlayed = (user.gamesPlayed || 0) + 1;
+
+                this.currentUser = { username: this.currentUser.username, ...user };
+                this.saveUsers();
+                this.saveSession();
+            }
+
+            logout() {
+                this.currentUser = null;
+                localStorage.removeItem('tetrisCurrentUser');
+                location.reload();
+            }
+
+            getCurrentUser() {
+                return this.currentUser;
+            }
+        }
+
+        // Global functions
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginUsername').focus();
+        }
+
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('registerUsername').focus();
+        }
+
+        function playAsGuest() {
+            authSystem.currentUser = {
+                username: 'Guest',
+                bestScore: 0,
+                highestLevel: 1,
+                totalLines: 0,
+                gamesPlayed: 0
+            };
+            startGame();
+        }
+
+        function startGame() {
+            // Store auth info for game
+            localStorage.setItem('tetrisGameAuth', JSON.stringify(authSystem.getCurrentUser()));
+            window.location.href = 'tetris-web.html';
+        }
+
+        function viewLeaderboard() {
+            window.location.href = 'leaderboard.html';
+        }
+
+        function logout() {
+            authSystem.logout();
+        }
+
+        // Initialize authentication system
+        const authSystem = new AuthSystem();
+        
+        // Focus on username field by default
+        setTimeout(() => {
+            document.getElementById('loginUsername').focus();
+        }, 500);
+    </script>
+</body>
+</html>
